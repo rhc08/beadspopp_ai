@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beads Popp Palette</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --baby-pink: #FFC0CB;
+      --text-color: #fff;
+      --card-bg: rgba(255,255,255,0.2);
+      --shadow: rgba(0,0,0,0.1);
+      --accent: #fff;
+    }
+    *{box-sizing:border-box;}
+    body {
+      margin:0; padding:0;
+      background:var(--baby-pink);
+      font-family:'Poppins',sans-serif;
+      color:var(--text-color);
+    }
+    .container {
+      max-width:700px;
+      margin:2rem auto;
+      padding:0 1rem;
+    }
+    .card {
+      background:var(--card-bg);
+      border-radius:12px;
+      box-shadow:0 4px 12px var(--shadow);
+      padding:2rem;
+      backdrop-filter:blur(10px);
+      margin-bottom:2rem;
+    }
+    h1 { text-align:center; margin-bottom:1rem; font-weight:600; }
+    h2 { margin-top:0; font-weight:500; }
+    input[type=file] {
+      display:block; margin:1rem auto;
+      background:rgba(255,255,255,0.3);
+      color:var(--text-color);
+      border:none; padding:0.5rem 1rem;
+      border-radius:6px; cursor:pointer;
+    }
+    #preview {
+      display:none; text-align:center; margin-top:1rem;
+    }
+    #preview img {
+      max-width:100%; border:2px solid var(--accent);
+      border-radius:8px;
+    }
+    #result {
+      margin-top:1rem; min-height:2rem;
+      text-align:center;
+    }
+    .spinner {
+      width:24px; height:24px;
+      border:4px solid rgba(255,255,255,0.3);
+      border-top:4px solid var(--accent);
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+      display:inline-block;
+    }
+    @keyframes spin { to{transform:rotate(360deg);} }
+    .beads-list {
+      display:flex; flex-wrap:wrap;
+      justify-content:center; gap:0.5rem;
+      margin-top:1rem;
+    }
+    .bead-item {
+      background:var(--accent);
+      color:var(--baby-pink);
+      padding:0.5rem 1rem;
+      border-radius:20px;
+      font-weight:600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Beads Popp Palette</h1>
+    <div class="card upload-section">
+      <h2>Upload Your Photo</h2>
+      <input type="file" id="file" accept="image/*">
+      <div id="preview"><img id="preview-img" src="" alt="Preview"></div>
+      <div id="result">BeadsPopp AI suggests these bead colors:</div>
+    </div>
+  </div>
+
+  <script>
+    const fileInput  = document.getElementById('file');
+    const preview    = document.getElementById('preview');
+    const previewImg = document.getElementById('preview-img');
+    const resultDiv  = document.getElementById('result');
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // show preview
+      previewImg.src        = URL.createObjectURL(file);
+      preview.style.display = 'block';
+
+      // spinner
+      resultDiv.innerHTML = '<div class="spinner"></div>';
+
+      // upload
+      const fd = new FormData();
+      fd.append('image', file);
+      try {
+        const res = await fetch('/extract', { method:'POST', body:fd });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        const { palette } = await res.json();
+
+        // render 5 bead names
+        resultDiv.innerHTML = `
+          <strong>BeadsPopp AI suggests these bead colors:</strong>
+          <div class="beads-list">
+            ${palette.map(b => `<div class="bead-item">${b.name}</div>`).join('')}
+          </div>
+        `;
+      } catch (err) {
+        resultDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>

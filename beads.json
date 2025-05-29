@@ -8,14 +8,6 @@
     ]
   },
   {
-    "name": "slate",
-    "rgb": [
-      112,
-      128,
-      144
-    ]
-  },
-  {
     "name": "indigo",
     "rgb": [
       75,
@@ -216,7 +208,7 @@
     ]
   },
   {
-    "name": "lavneder",
+    "name": "lavender",
     "rgb": [
       230,
       230,
